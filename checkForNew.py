@@ -69,11 +69,15 @@ def getFileSize(file):
         return True
 
 def transcode(files):
+    notTranscoded = []
     for file in files:
         if getFileSize(file):
             crop = getCrop(file)
             subprocess.call([workingDir + 'crop.sh', workingDir + 'Input/' + file, crop,
             workingDir + 'Output/' + file, workingDir + 'Processed/' + file])
+        else:
+            notTranscoded.append(file)
+    return notTranscoded
 
 def getCrop(file):
     subprocess.call([workingDir + 'cropdetect.sh', workingDir + "Input/" + file, workingDir])
@@ -86,7 +90,11 @@ def getCrop(file):
 currentFiles = getCurrentFiles()
 oldFiles = getOldFiles()
 newFiles = getNewFiles(currentFiles, oldFiles)
-writeCurrentFiles(currentFiles)
+
 
 print("New files detected\n", newFiles)
-transcode(newFiles)
+failed = transcode(newFiles)
+
+for file in failed:
+    currentFiles.remove(file)
+writeCurrentFiles(currentFiles)
