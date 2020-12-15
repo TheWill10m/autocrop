@@ -1,5 +1,7 @@
 import subprocess
 
+workingDir = ""
+
 currentFiles = []
 oldFiles = []
 newFiles = []
@@ -7,7 +9,7 @@ removedFiles = []
 queue = []
 
 def getCurrentFiles():
-    out = subprocess.Popen(['ls', 'Input/'], 
+    out = subprocess.Popen(['ls', workingDir + 'Input/'], 
             stdout=subprocess.PIPE, 
             stderr=subprocess.STDOUT)
 
@@ -19,7 +21,7 @@ def getCurrentFiles():
     return currentFiles
 
 def getOldFiles():
-    log = open('log.txt', 'r')
+    log = open(workingDir + 'log.txt', 'r')
     files = log.readlines()
     log.close()
 
@@ -29,7 +31,7 @@ def getOldFiles():
     return files
 
 def writeCurrentFiles(files):
-    log=open('log.txt','w')
+    log=open(workingDir + 'log.txt','w')
     for file in files:
         log.write(file + "\n")
     log.close()
@@ -55,13 +57,15 @@ def getRemovedFiles(currentFiles, oldFiles):
 def transcode(files):
     for file in files:
         crop = getCrop(file)
-        subprocess.call(['./crop.sh', file, crop])
+        subprocess.call([workingDir + 'crop.sh', workingDir + 'Input/' + file, crop,
+        workingDir + 'Output/' + file, workingDir + 'Processed/' + file])
 
 def getCrop(file):
-    subprocess.call(['./cropdetect.sh', file])
+    subprocess.call([workingDir + 'cropdetect.sh', workingDir + "Input/" + file, workingDir])
     cropdetect=open('crop.txt','r')
     crop = cropdetect.read()
     cropdetect.close()
+    subprocess.call(['rm', workingDir + 'crop.txt'])
     return crop
 
 currentFiles = getCurrentFiles()
