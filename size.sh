@@ -1,4 +1,4 @@
 #!/bin/bash
 
-size=`stat "$1"`
+size=`ls -ls "$1"`
 echo "$size" > "$2"size.txt
