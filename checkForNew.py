@@ -2,7 +2,7 @@ import subprocess
 import re
 import time
 
-workingDir = "/home/will/code/autocrop/"
+workingDir = ""
 
 currentFiles = []
 oldFiles = []
@@ -63,24 +63,14 @@ def getFileSize(file):
     sizeFile.close()
     subprocess.call(['rm', workingDir + 'size.txt'])
 
-    size = re.findall('[0-9]+', line)[0]
-    return size
-
-def checkIncreasingFileSize(file):
-    oldSize = getFileSize(file)
-    for i in range(48):
-        time.sleep(5)
-        print("Checking file size against", oldSize)
-        newSize = getFileSize(file)
-        if newSize == oldSize:
-            print("Size not increasing")
-            return False
-        oldSize = newSize
-    return True
+    if "Device or resource busy" in line:
+        return False
+    else:
+        return True
 
 def transcode(files):
     for file in files:
-        if not checkIncreasingFileSize(file):
+        if getFileSize(file):
             crop = getCrop(file)
             subprocess.call([workingDir + 'crop.sh', workingDir + 'Input/' + file, crop,
             workingDir + 'Output/' + file, workingDir + 'Processed/' + file])
