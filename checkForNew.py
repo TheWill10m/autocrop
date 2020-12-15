@@ -40,7 +40,7 @@ def getNewFiles(currentFiles, oldFiles):
         if currentFile not in oldFiles:
             files.append(currentFile)
     
-    print("New files: \n", files)
+    #print("New files: \n", files)
     return files
 
 def getRemovedFiles(currentFiles, oldFiles):
@@ -52,9 +52,10 @@ def getRemovedFiles(currentFiles, oldFiles):
     print("Removed files: \n", files)
     return files
 
-def transcode(file):
-    crop = getCrop(file)
-    subprocess.call(['./crop.sh', file, crop])
+def transcode(files):
+    for file in files:
+        crop = getCrop(file)
+        subprocess.call(['./crop.sh', file, crop])
 
 def getCrop(file):
     subprocess.call(['./cropdetect.sh', file])
@@ -63,50 +64,10 @@ def getCrop(file):
     cropdetect.close()
     return crop
 
-def getQueue():
-    queue = []
-    qFile=open('queue.txt','r')
-    queue = qFile.readlines()
-    qFile.close()
-
-    for i in range(len(queue) - 1):
-        queue[i] = queue[i][:-1]
-    return queue
-
-def writeQueue(queue):
-    file = open('queue.txt', 'w')
-    for item in queue:
-        file.write(item + "\n")
-    file.close()
-
-def addToQueue(files, queue):
-    for file in files:
-        queue.append(file)
-
-def checkTranscoding():
-    file=open("transcoding.txt")
-    transcoding = file.readline()
-    file.close()
-
-    if transcoding[:-1] == "True":
-        return True
-    else:
-        return False
-
 currentFiles = getCurrentFiles()
 oldFiles = getOldFiles()
 newFiles = getNewFiles(currentFiles, oldFiles)
 writeCurrentFiles(currentFiles)
 
-print("Current files:\n", currentFiles)
-
-queue = getQueue()
-addToQueue(newFiles, queue)
-
-print("Queue:\n", queue)
-
-if not checkTranscoding() and len(queue) > 0:
-    print("Going to transcode ", queue[0])
-    transcode(queue.pop(0))
-
-writeQueue(queue)
+print("New files detected\n", newFiles)
+transcode(newFiles)
